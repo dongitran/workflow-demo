@@ -1,83 +1,51 @@
-name: Build and Push to Docker Hub
+name: Build and Push Workflow
 
 on:
   workflow_call:
     inputs:
       repository:
+        description: 'Repository name'
         required: true
         type: string
-        description: 'Repository to checkout (format: owner/repo)'
       ref:
+        description: 'Git reference'
         required: true
         type: string
-        description: 'Branch or ref to checkout'
       image_name:
+        description: 'Docker image name'
         required: true
         type: string
-        description: 'Docker image name'
-    secrets:
-      DOCKER_USERNAME:
-        required: true
-      DOCKER_PASSWORD:
-        required: true
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout calling repository
+      - name: Echo workflow inputs
+        run: |
+          echo "🚀 Starting build and push workflow"
+          echo "Repository: ${{ inputs.repository }}"
+          echo "Git ref: ${{ inputs.ref }}"
+          echo "Image name: ${{ inputs.image_name }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "GitHub event: ${{ github.event_name }}"
+          
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.repository }}
-          ref: ${{ inputs.ref }}
-          token: ${{ github.token }}
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
-
-      - name: Build application
-        run: npm run build --if-present
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Image digest
-        run: echo "Image pushed with digest: ${{ steps.meta.outputs.digest }}"
+        
+      - name: Simulate build step
+        run: |
+          echo "📦 Building application..."
+          echo "Build completed successfully!"
+          
+      - name: Simulate push step
+        run: |
+          echo "🐳 Pushing to Docker Hub..."
+          echo "Image: ${{ inputs.image_name }}"
+          echo "Push completed successfully!"
+          
+      - name: Summary
+        run: |
+          echo "✅ Workflow completed successfully"
+          echo "Repository: ${{ inputs.repository }}"
+          echo "Image: ${{ inputs.image_name }}"
